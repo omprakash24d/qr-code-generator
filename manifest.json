@@ -1,0 +1,91 @@
+{
+  "name": "QR Code Generator - Free Custom QR Codes",
+  "short_name": "QR Generator",
+  "description": "Create custom QR codes with logo overlay, UTM tracking, and download in PNG/SVG formats. Works offline!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#1a73e8",
+  "lang": "en-US",
+  "categories": ["productivity", "utilities", "business"],
+  "shortcuts": [
+    {
+      "name": "Generate QR Code",
+      "short_name": "Generate",
+      "description": "Quickly generate a new QR code",
+      "url": "./?action=generate",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Dark Mode",
+      "short_name": "Dark",
+      "description": "Switch to dark theme",
+      "url": "./?theme=dark",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%231a73e8'><rect width='512' height='512' rx='15%' fill='%23fff'/><path d='M96 96h80v80H96zm48 0h16v16h-16zm16 16h16v16h-16zm-16 16h16v16h-16zm-16 16h16v16h-16zm48-48h16v16h-16zm-16 16h16v16h-16zm-16 16h16v16h-16zm80-48h80v80h-80zm16 16h16v16h-16zm16-16h16v16h-16zm16 16h16v16h-16zm-16 16h16v16h-16zm-16-16h16v16h-16zm32 0h16v16h-16zm-16 16h16v16h-16zm32-32h16v16h-16zm0 32h16v16h-16zm-80 48h16v16H96zm16 0h16v16h-16zm16 0h16v16h-16zm16 0h16v16h-16zm16 0h16v16h-16zm16 0h16v16h-16zm16 0h16v16h-16zm16 0h16v16h-16z'/><path d='M96 256h80v80H96zm16 16h16v16h-16zm16-16h16v16h-16zm16 16h16v16h-16zm-16 16h16v16h-16zm48-48h16v16h-16zm-16 16h16v16h-16zm-16 16h16v16h-16z'/><path d='M336 256h80v80h-80zm16 16h16v16h-16zm16-16h16v16h-16zm16 16h16v16h-16zm-16 16h16v16h-16zm48-48h16v16h-16zm-16 16h16v16h-16zm-16 16h16v16h-16z'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' fill='%231a73e8'><rect width='192' height='192' rx='15%' fill='%23fff'/><path d='M36 36h30v30H36zm18 0h6v6h-6zm6 6h6v6h-6zm-6 6h6v6h-6zm-6 6h6v6h-6zm18-18h6v6h-6zm-6 6h6v6h-6zm-6 6h6v6h-6zm30-18h30v30h-30zm6 6h6v6h-6zm6-6h6v6h-6zm6 6h6v6h-6zm-6 6h6v6h-6zm-6-6h6v6h-6zm12 0h6v6h-6zm-6 6h6v6h-6zm12-12h6v6h-6zm0 12h6v6h-6zm-30 18h6v6H36zm6 0h6v6h-6zm6 0h6v6h-6zm6 0h6v6h-6zm6 0h6v6h-6zm6 0h6v6h-6zm6 0h6v6h-6zm6 0h6v6h-6z'/><path d='M36 96h30v30H36zm6 6h6v6h-6zm6-6h6v6h-6zm6 6h6v6h-6zm-6 6h6v6h-6zm18-18h6v6h-6zm-6 6h6v6h-6zm-6 6h6v6h-6z'/><path d='M126 96h30v30h-30zm6 6h6v6h-6zm6-6h6v6h-6zm6 6h6v6h-6zm-6 6h6v6h-6zm18-18h6v6h-6zm-6 6h6v6h-6zm-6 6h6v6h-6z'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96' fill='%231a73e8'><rect width='96' height='96' rx='15%' fill='%23fff'/><path d='M18 18h15v15H18zm9 0h3v3h-3zm3 3h3v3h-3zm-3 3h3v3h-3zm-3 3h3v3h-3zm9-9h3v3h-3zm-3 3h3v3h-3zm-3 3h3v3h-3zm15-9h15v15H48zm3 3h3v3h-3zm3-3h3v3h-3zm3 3h3v3h-3zm-3 3h3v3h-3zm-3-3h3v3h-3zm6 0h3v3h-3zm-3 3h3v3h-3zm6-6h3v3h-3zm0 6h3v3h-3zm-15 9h3v3H18zm3 0h3v3h-3zm3 0h3v3h-3zm3 0h3v3h-3zm3 0h3v3h-3zm3 0h3v3h-3zm3 0h3v3h-3zm3 0h3v3h-3z'/><path d='M18 48h15v15H18zm3 3h3v3h-3zm3-3h3v3h-3zm3 3h3v3h-3zm-3 3h3v3h-3zm9-9h3v3h-3zm-3 3h3v3h-3zm-3 3h3v3h-3z'/><path d='M63 48h15v15H63zm3 3h3v3h-3zm3-3h3v3h-3zm3 3h3v3h-3zm-3 3h3v3h-3zm9-9h3v3h-3zm-3 3h3v3h-3zm-3 3h3v3h-3z'/></svg>",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720' fill='%23f8fafc'><rect width='540' height='720' fill='%23f8fafc'/><rect x='20' y='20' width='500' height='680' rx='10' fill='%23fff' stroke='%23e2e8f0'/><text x='270' y='60' text-anchor='middle' font-family='system-ui' font-size='24' font-weight='bold' fill='%231a73e8'>QR Code Generator</text><rect x='40' y='100' width='460' height='300' rx='8' fill='%23f1f5f9'/><rect x='60' y='120' width='420' height='40' rx='4' fill='%23fff' stroke='%23cbd5e1'/><text x='70' y='145' font-family='system-ui' font-size='14' fill='%2364748b'>https://example.com</text><rect x='200' y='180' width='140' height='100' fill='%23000'/><rect x='210' y='190' width='20' height='20' fill='%23fff'/><rect x='240' y='190' width='20' height='20' fill='%23fff'/><rect x='270' y='190' width='20' height='20' fill='%23fff'/><rect x='300' y='190' width='20' height='20' fill='%23fff'/><rect x='210' y='220' width='20' height='20' fill='%23fff'/><rect x='300' y='220' width='20' height='20' fill='%23fff'/><rect x='210' y='250' width='20' height='20' fill='%23fff'/><rect x='240' y='250' width='20' height='20' fill='%23fff'/><rect x='270' y='250' width='20' height='20' fill='%23fff'/><rect x='300' y='250' width='20' height='20' fill='%23fff'/><rect x='60' y='320' width='200' height='40' rx='20' fill='%231a73e8'/><text x='160' y='345' text-anchor='middle' font-family='system-ui' font-size='16' font-weight='500' fill='%23fff'>Download PNG</text><rect x='280' y='320' width='200' height='40' rx='20' fill='%234caf50'/><text x='380' y='345' text-anchor='middle' font-family='system-ui' font-size='16' font-weight='500' fill='%23fff'>Download SVG</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "QR Code Generator - Main interface showing QR code generation and download options"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 768' fill='%23f8fafc'><rect width='1024' height='768' fill='%23f8fafc'/><rect x='50' y='50' width='924' height='668' rx='15' fill='%23fff' stroke='%23e2e8f0'/><text x='512' y='100' text-anchor='middle' font-family='system-ui' font-size='32' font-weight='bold' fill='%231a73e8'>QR Code Generator</text><rect x='80' y='150' width='400' height='500' rx='12' fill='%23f1f5f9'/><rect x='100' y='180' width='360' height='50' rx='6' fill='%23fff' stroke='%23cbd5e1'/><text x='110' y='210' font-family='system-ui' font-size='16' fill='%2364748b'>Enter your URL or text...</text><rect x='544' y='150' width='400' height='500' rx='12' fill='%23f1f5f9'/><rect x='644' y='200' width='200' height='200' fill='%23000'/><g fill='%23fff'><rect x='654' y='210' width='30' height='30'/><rect x='704' y='210' width='30' height='30'/><rect x='754' y='210' width='30' height='30'/><rect x='654' y='260' width='30' height='30'/><rect x='754' y='260' width='30' height='30'/><rect x='654' y='310' width='30' height='30'/><rect x='704' y='310' width='30' height='30'/><rect x='754' y='310' width='30' height='30'/></g></svg>",
+      "sizes": "1024x768",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "QR Code Generator - Desktop view with form and preview"
+    }
+  ],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+qr",
+      "url": "./?qr=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]
+      },
+      "launch_type": "single-client"
+    }
+  ]
+}

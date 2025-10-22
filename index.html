@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Free QR Code Generator by Om Prakash - Create custom QR codes instantly with logo overlay. Download as PNG/SVG. Works offline. Mobile-friendly and fast."
+    />
+    <meta
+      name="keywords"
+      content="QR code generator, free QR code maker, create QR code, QR generator online, download QR PNG SVG, custom QR code, logo QR code, mobile QR generator, offline QR maker"
+    />
+    <meta name="author" content="Om Prakash - omprakash24d" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#1a73e8" />
+    <meta
+      property="og:title"
+      content="Free QR Code Generator - Create Custom QR Codes Online"
+    />
+    <meta
+      property="og:description"
+      content="Generate custom QR codes with logo overlay and download in PNG/SVG formats. Mobile-friendly, works offline, dark mode support."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://omprakash24d.github.io/qr-code-generator/"
+    />
+    <meta
+      property="og:image"
+      content="https://omprakash24d.github.io/qr-code-generator/qr-preview.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Free QR Code Generator - Create Custom QR Codes"
+    />
+    <meta
+      name="twitter:description"
+      content="Generate custom QR codes with logo overlay. Download PNG/SVG formats."
+    />
+    <link
+      rel="canonical"
+      href="https://omprakash24d.github.io/qr-code-generator/"
+    />
+    <title>
+      Free QR Code Generator - Create Custom QR Codes Online | Om Prakash
+    </title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="skip-link">
+      <a href="#main-content">Skip to main content</a>
+    </div>
+
+    <header class="header">
+      <div class="container">
+        <h1 class="logo">📱 QR Code Generator</h1>
+        <button
+          class="theme-toggle"
+          id="theme-toggle"
+          aria-label="Toggle dark mode"
+          title="Toggle dark mode"
+        >
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+          <span class="sr-only">Toggle dark mode</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content" class="main">
+      <div class="container">
+        <section class="hero">
+          <h2 class="hero-title">Create Custom QR Codes Instantly</h2>
+          <p class="hero-subtitle">
+            Generate professional QR codes with logo overlay and download in
+            multiple formats. Works offline and mobile-friendly.
+          </p>
+        </section>
+
+        <section class="generator-section">
+          <!-- Mode Selection Tabs -->
+          <div class="mode-tabs">
+            <button class="tab-btn active" data-tab="single">Single QR</button>
+            <button class="tab-btn" data-tab="batch">Batch QR</button>
+            <button class="tab-btn" data-tab="scan">Scan QR</button>
+          </div>
+
+          <!-- Live Preview Panel -->
+          <div
+            class="live-preview-panel"
+            id="live-preview"
+            style="display: none"
+          >
+            <h4>Live Preview</h4>
+            <div class="preview-container">
+              <canvas id="preview-canvas" width="200" height="200"></canvas>
+            </div>
+          </div>
+
+          <form
+            id="qr-form"
+            class="qr-form tab-content active"
+            data-content="single"
+            aria-label="QR Code Generator Form"
+            novalidate
+          >
+            <div class="form-group">
+              <label for="qr-text" class="form-label"
+                >Text or URL <span aria-label="required">*</span></label
+              >
+              <div class="input-with-preview">
+                <input
+                  type="text"
+                  id="qr-text"
+                  class="form-input"
+                  placeholder="https://example.com"
+                  required
+                  aria-describedby="qr-text-help"
+                  autocomplete="url"
+                />
+                <div class="content-type-indicator" id="content-type"></div>
+              </div>
+              <small id="qr-text-help" class="help-text"
+                >Enter any text, URL, email, phone number, or Wi-Fi
+                config</small
+              >
+            </div>
+
+            <!-- Color Customization -->
+            <div class="form-group">
+              <label class="form-label">🎨 Customize Colors</label>
+              <div class="color-picker-group">
+                <div class="color-input-group">
+                  <label for="fg-color">Foreground</label>
+                  <input type="color" id="fg-color" value="#000000" />
+                </div>
+                <div class="color-input-group">
+                  <label for="bg-color">Background</label>
+                  <input type="color" id="bg-color" value="#ffffff" />
+                </div>
+                <button type="button" id="reset-colors" class="reset-btn">
+                  Reset
+                </button>
+              </div>
+              <div class="contrast-indicator" id="contrast-info"></div>
+            </div>
+
+            <!-- Logo Upload with Drag & Drop -->
+            <div class="form-group">
+              <label for="logo-upload" class="form-label"
+                >🎨 Logo Overlay (Optional)</label
+              >
+              <div class="drag-drop-zone" id="drag-zone">
+                <input
+                  type="file"
+                  id="logo-upload"
+                  class="file-input"
+                  accept="image/*"
+                  aria-describedby="logo-help"
+                />
+                <div class="drag-content">
+                  <div class="drag-icon">📁</div>
+                  <p>Drag & drop your logo here</p>
+                  <span
+                    >or
+                    <button type="button" class="browse-btn">
+                      browse
+                    </button></span
+                  >
+                </div>
+                <div class="file-preview" id="logo-preview"></div>
+              </div>
+              <small id="logo-help" class="help-text"
+                >PNG, JPG, or SVG. Max size: 2MB. Best ratio: 1:1
+                (square)</small
+              >
+            </div>
+
+            <!-- QR Styling Options -->
+            <div class="form-group">
+              <label class="form-label">🎭 QR Style</label>
+              <div class="style-options">
+                <label class="radio-option">
+                  <input type="radio" name="qr-style" value="square" checked />
+                  <span>Square</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="qr-style" value="rounded" />
+                  <span>Rounded</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="qr-style" value="dots" />
+                  <span>Dots</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Text Below QR -->
+            <div class="form-group">
+              <label for="qr-label" class="form-label"
+                >📝 Text Below QR (Optional)</label
+              >
+              <input
+                type="text"
+                id="qr-label"
+                class="form-input"
+                placeholder="Enter text to display below QR code"
+              />
+            </div>
+
+            <!-- QR Code Size and Expiry -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="qr-size" class="form-label">QR Code Size</label>
+                <select id="qr-size" class="form-select">
+                  <option value="256">Small (256x256)</option>
+                  <option value="512" selected>Medium (512x512)</option>
+                  <option value="1024">Large (1024x1024)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="qr-expiry" class="form-label"
+                  >⏰ Expiry (Optional)</label
+                >
+                <select id="qr-expiry" class="form-select">
+                  <option value="">No Expiry</option>
+                  <option value="1">1 Hour</option>
+                  <option value="24">24 Hours</option>
+                  <option value="168">7 Days</option>
+                  <option value="720">30 Days</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="generate-btn" id="generate-btn">
+              <span class="btn-text">Generate QR Code</span>
+              <span class="btn-loader" aria-hidden="true"></span>
+            </button>
+          </form>
+
+          <!-- Batch QR Form -->
+          <div class="tab-content" data-content="batch">
+            <div class="batch-form">
+              <h3>📦 Batch QR Code Generation</h3>
+
+              <div class="form-group">
+                <label class="form-label">Input Method</label>
+                <div class="input-method-tabs">
+                  <button
+                    type="button"
+                    class="method-btn active"
+                    data-method="csv"
+                  >
+                    Upload CSV
+                  </button>
+                  <button type="button" class="method-btn" data-method="text">
+                    Paste Text
+                  </button>
+                </div>
+              </div>
+
+              <!-- CSV Upload -->
+              <div class="method-content active" data-method-content="csv">
+                <div class="form-group">
+                  <div class="drag-drop-zone" id="csv-drop-zone">
+                    <input
+                      type="file"
+                      id="csv-upload"
+                      accept=".csv"
+                      class="file-input"
+                    />
+                    <div class="drag-content">
+                      <div class="drag-icon">📄</div>
+                      <p>Drag & drop your CSV file here</p>
+                      <span
+                        >or
+                        <button type="button" class="browse-btn">
+                          browse
+                        </button></span
+                      >
+                    </div>
+                  </div>
+                  <small class="help-text"
+                    >CSV format: url,label (one per line)</small
+                  >
+                </div>
+              </div>
+
+              <!-- Text Input -->
+              <div class="method-content" data-method-content="text">
+                <div class="form-group">
+                  <label for="batch-text" class="form-label"
+                    >URLs/Text (one per line)</label
+                  >
+                  <textarea
+                    id="batch-text"
+                    class="form-textarea"
+                    rows="8"
+                    placeholder="https://example1.com&#10;https://example2.com&#10;mailto:test@example.com"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="batch-options">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="batch-size" class="form-label">Size</label>
+                    <select id="batch-size" class="form-select">
+                      <option value="256">Small</option>
+                      <option value="512" selected>Medium</option>
+                      <option value="1024">Large</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="batch-format" class="form-label">Format</label>
+                    <select id="batch-format" class="form-select">
+                      <option value="png">PNG</option>
+                      <option value="svg">SVG</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" id="generate-batch" class="generate-btn">
+                <span class="btn-text">Generate Batch QR Codes</span>
+                <span class="btn-loader" aria-hidden="true"></span>
+              </button>
+
+              <div
+                class="batch-progress"
+                id="batch-progress"
+                style="display: none"
+              >
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span class="progress-text" id="progress-text">0 / 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- QR Scanner -->
+          <div class="tab-content" data-content="scan">
+            <div class="scanner-container">
+              <h3>📷 Scan QR Code</h3>
+              <div class="camera-container">
+                <video
+                  id="camera-feed"
+                  class="camera-feed"
+                  autoplay
+                  muted
+                ></video>
+                <canvas id="scanner-canvas" class="scanner-canvas"></canvas>
+                <div class="scanner-overlay">
+                  <div class="scanner-frame"></div>
+                </div>
+              </div>
+
+              <div class="scanner-controls">
+                <button type="button" id="start-camera" class="scanner-btn">
+                  Start Camera
+                </button>
+                <button
+                  type="button"
+                  id="stop-camera"
+                  class="scanner-btn"
+                  style="display: none"
+                >
+                  Stop Camera
+                </button>
+                <button
+                  type="button"
+                  id="switch-camera"
+                  class="scanner-btn"
+                  style="display: none"
+                >
+                  Switch Camera
+                </button>
+              </div>
+
+              <div class="scan-result" id="scan-result" style="display: none">
+                <h4>Scanned Result:</h4>
+                <div class="scanned-content" id="scanned-content"></div>
+                <button type="button" id="copy-scanned" class="copy-btn">
+                  Copy Text
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="qr-result" id="qr-result" style="display: none">
+            <div
+              id="qr-output"
+              class="qr-display"
+              aria-live="polite"
+              aria-label="Generated QR code"
+            ></div>
+            <div class="download-section" id="download-section">
+              <h3 class="download-title">Download Your QR Code</h3>
+              <div class="download-buttons">
+                <button
+                  id="download-png"
+                  class="download-btn"
+                  type="button"
+                  aria-label="Download as PNG image"
+                >
+                  <span>📥 PNG</span>
+                </button>
+                <button
+                  id="download-svg"
+                  class="download-btn"
+                  type="button"
+                  aria-label="Download as SVG vector"
+                >
+                  <span>📄 SVG</span>
+                </button>
+              </div>
+
+              <!-- Social Sharing -->
+              <div class="social-sharing">
+                <h4>Share Your QR Code</h4>
+                <div class="share-buttons">
+                  <button id="share-whatsapp" class="share-btn whatsapp">
+                    <span>📱 WhatsApp</span>
+                  </button>
+                  <button id="share-twitter" class="share-btn twitter">
+                    <span>🐦 Twitter</span>
+                  </button>
+                  <button id="share-email" class="share-btn email">
+                    <span>✉️ Email</span>
+                  </button>
+                  <button id="share-copy" class="share-btn copy">
+                    <span>📋 Copy Link</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PWA Install Prompt -->
+        <div class="pwa-install-banner" id="pwa-banner" style="display: none">
+          <div class="banner-content">
+            <div class="banner-info">
+              <h4>📱 Install QR Generator App</h4>
+              <p>Get instant access and work offline!</p>
+            </div>
+            <div class="banner-actions">
+              <button id="install-app" class="install-btn">Install</button>
+              <button id="dismiss-banner" class="dismiss-btn">×</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Offline History Section -->
+        <section
+          class="history-section"
+          id="history-section"
+          style="display: none"
+        >
+          <div class="container">
+            <h2 class="section-title">📚 QR Code History</h2>
+            <div class="history-controls">
+              <button id="clear-history" class="clear-btn">Clear All</button>
+              <button id="export-history" class="export-btn">
+                Export History
+              </button>
+            </div>
+            <div class="history-grid" id="history-grid">
+              <!-- History items will be populated here -->
+            </div>
+          </div>
+        </section>
+
+        <section class="features-section">
+          <h2 class="section-title">Why Choose Our QR Generator?</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">📱</div>
+              <h3>Mobile Responsive</h3>
+              <p>
+                Works perfectly on all devices - desktop, tablet, and mobile
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🎨</div>
+              <h3>Custom Logo</h3>
+              <p>Add your brand logo to the center of QR codes</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">�</div>
+              <h3>Multiple Formats</h3>
+              <p>Download as PNG for web or SVG for print</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">�</div>
+              <h3>Privacy First</h3>
+              <p>All processing happens in your browser</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">⚡</div>
+              <h3>Works Offline</h3>
+              <p>PWA support - use without internet connection</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🌙</div>
+              <h3>Dark Mode</h3>
+              <p>Beautiful dark theme for comfortable usage</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="faq-section">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <div class="faq-container">
+            <div class="faq-item">
+              <button class="faq-question" aria-expanded="false">
+                <span>What types of data can I encode in a QR code?</span>
+                <span class="faq-icon">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  You can encode URLs, plain text, email addresses, phone
+                  numbers, WiFi credentials, and more. Our generator supports
+                  all standard QR code data types including social media
+                  profiles, contact information, and custom text.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question" aria-expanded="false">
+                <span
+                  >Are the QR codes generated free to use commercially?</span
+                >
+                <span class="faq-icon">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Yes! All QR codes generated are completely free to use for
+                  personal and commercial purposes without any restrictions,
+                  watermarks, or licensing fees. Use them in your business,
+                  marketing materials, or personal projects.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question" aria-expanded="false">
+                <span
+                  >What's the difference between PNG and SVG downloads?</span
+                >
+                <span class="faq-icon">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  PNG is a raster format perfect for digital use like websites
+                  and social media. SVG is vector-based, making it ideal for
+                  print materials as it scales to any size without quality loss.
+                  Choose PNG for screens, SVG for print.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question" aria-expanded="false">
+                <span>Can I add my logo to the QR code?</span>
+                <span class="faq-icon">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Absolutely! You can upload your logo in PNG, JPG, or SVG
+                  format (max 2MB). The logo will be automatically centered and
+                  sized appropriately. For best results, use a square logo with
+                  good contrast.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question" aria-expanded="false">
+                <span>Does this work offline?</span>
+                <span class="faq-icon">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Yes! This is a Progressive Web App (PWA) that works completely
+                  offline after the first visit. You can generate QR codes, add
+                  logos, and download them even without an internet connection.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button class="faq-question" aria-expanded="false">
+                <span>Is my data secure and private?</span>
+                <span class="faq-icon">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>
+                  Completely secure! All QR code generation happens locally in
+                  your browser. No data is sent to external servers, uploaded to
+                  the cloud, or stored anywhere. Your privacy is 100% protected.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer" id="footer-section">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-info">
+            <h3>QR Code Generator</h3>
+            <p>
+              Create professional QR codes instantly with logo overlay. Free,
+              fast, and privacy-focused.
+            </p>
+          </div>
+
+          <div class="footer-links">
+            <h4>Connect with Om Prakash</h4>
+            <div class="social-links">
+              <a
+                href="https://github.com/omprakash24d"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+                GitHub
+              </a>
+
+              <a
+                href="https://linkedin.com/in/omprakash24d"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+                LinkedIn
+              </a>
+
+              <a
+                href="https://instagram.com/omprakash24d"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                  />
+                </svg>
+                Instagram
+              </a>
+
+              <a href="mailto:omprakash@indhinditech.com" aria-label="Email">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                  />
+                </svg>
+                Email
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Console Code Area -->
+        <div class="search-console-area">
+          <div class="console-info">
+            <h4>🔍 Search Console Integration</h4>
+            <p>Add your Google Search Console verification code below:</p>
+          </div>
+          <div class="console-code-area">
+            <textarea
+              id="search-console-code"
+              placeholder="Paste your Google Search Console verification code here..."
+              rows="3"
+            ></textarea>
+            <button id="apply-console-code" class="apply-btn">
+              Apply Code
+            </button>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 Om Prakash (omprakash24d). Built with ❤️ for the web.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling/lib/qr-code-styling.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

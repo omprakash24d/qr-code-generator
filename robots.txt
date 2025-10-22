@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://omprakash24d.github.io/qr-code-generator/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1

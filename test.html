@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Generator Test</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #f8fafc;
+      }
+
+      .test-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .test-result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+      }
+
+      .success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+
+      .error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .feature-test {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        padding: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .status {
+        font-weight: bold;
+      }
+
+      .pass {
+        color: #059669;
+      }
+      .fail {
+        color: #dc2626;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 QR Code Generator - Feature Tests</h1>
+
+    <div class="test-section">
+      <h2>Browser Compatibility</h2>
+      <div id="browser-tests"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Core Features</h2>
+      <div id="feature-tests"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>PWA Features</h2>
+      <div id="pwa-tests"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Performance Tests</h2>
+      <div id="performance-tests"></div>
+    </div>
+
+    <script>
+      // Test Results Storage
+      const results = {
+        browser: [],
+        features: [],
+        pwa: [],
+        performance: [],
+      };
+
+      // Utility Functions
+      function addTest(category, name, condition) {
+        const result = {
+          name,
+          status: condition ? "PASS" : "FAIL",
+          passed: condition,
+        };
+        results[category].push(result);
+      }
+
+      function renderTests(category, containerId) {
+        const container = document.getElementById(containerId);
+        const tests = results[category];
+
+        container.innerHTML = tests
+          .map(
+            (test) => `
+        <div class="feature-test">
+          <span>${test.name}</span>
+          <span class="status ${test.passed ? "pass" : "fail"}">${
+              test.status
+            }</span>
+        </div>
+      `
+          )
+          .join("");
+      }
+
+      // Browser Compatibility Tests
+      function runBrowserTests() {
+        addTest(
+          "browser",
+          "ES6+ Support",
+          typeof Symbol !== "undefined" && typeof Promise !== "undefined"
+        );
+
+        addTest("browser", "Fetch API", typeof fetch !== "undefined");
+
+        addTest(
+          "browser",
+          "Canvas Support",
+          !!document.createElement("canvas").getContext
+        );
+
+        addTest("browser", "File API", typeof FileReader !== "undefined");
+
+        addTest(
+          "browser",
+          "Local Storage",
+          typeof localStorage !== "undefined"
+        );
+
+        addTest("browser", "CSS Grid Support", CSS.supports("display", "grid"));
+
+        addTest(
+          "browser",
+          "CSS Custom Properties",
+          CSS.supports("color", "var(--test)")
+        );
+
+        renderTests("browser", "browser-tests");
+      }
+
+      // Core Feature Tests
+      function runFeatureTests() {
+        // Test QRCode library
+        addTest("features", "QRCode.js Library", typeof QRCode !== "undefined");
+
+        // Test DOM elements
+        const requiredElements = [
+          "qr-form",
+          "qr-text",
+          "qr-output",
+          "theme-toggle",
+        ];
+
+        requiredElements.forEach((id) => {
+          addTest("features", `Element: #${id}`, !!document.getElementById(id));
+        });
+
+        // Test theme system
+        addTest(
+          "features",
+          "Theme System",
+          document.documentElement.hasAttribute("data-theme") ||
+            localStorage.getItem("qr-generator-theme")
+        );
+
+        // Test form validation
+        const form = document.getElementById("qr-form");
+        addTest(
+          "features",
+          "Form Validation",
+          form && form.noValidate !== undefined
+        );
+
+        renderTests("features", "feature-tests");
+      }
+
+      // PWA Feature Tests
+      function runPWATests() {
+        addTest("pwa", "Service Worker Support", "serviceWorker" in navigator);
+
+        addTest(
+          "pwa",
+          "Web App Manifest",
+          !!document.querySelector('link[rel="manifest"]')
+        );
+
+        addTest(
+          "pwa",
+          "HTTPS (Secure Context)",
+          location.protocol === "https:" || location.hostname === "localhost"
+        );
+
+        addTest("pwa", "Cache API", "caches" in window);
+
+        addTest(
+          "pwa",
+          "Background Sync",
+          "serviceWorker" in navigator &&
+            "sync" in window.ServiceWorkerRegistration.prototype
+        );
+
+        addTest(
+          "pwa",
+          "Push Notifications",
+          "Notification" in window && "serviceWorker" in navigator
+        );
+
+        renderTests("pwa", "pwa-tests");
+      }
+
+      // Performance Tests
+      async function runPerformanceTests() {
+        const startTime = performance.now();
+
+        // Test page load time
+        const loadTime =
+          performance.timing.loadEventEnd - performance.timing.navigationStart;
+        addTest("performance", "Page Load < 3s", loadTime < 3000);
+
+        // Test DOM ready time
+        const domTime =
+          performance.timing.domContentLoadedEventEnd -
+          performance.timing.navigationStart;
+        addTest("performance", "DOM Ready < 2s", domTime < 2000);
+
+        // Test memory usage (approximate)
+        if (performance.memory) {
+          const memoryMB = performance.memory.usedJSHeapSize / 1024 / 1024;
+          addTest("performance", "Memory Usage < 50MB", memoryMB < 50);
+        } else {
+          addTest("performance", "Memory API Available", false);
+        }
+
+        // Test QR generation speed (if library loaded)
+        if (typeof QRCode !== "undefined") {
+          const qrStartTime = performance.now();
+          try {
+            const canvas = document.createElement("canvas");
+            await QRCode.toCanvas(canvas, "test", { width: 256 });
+            const qrTime = performance.now() - qrStartTime;
+            addTest("performance", "QR Generation < 500ms", qrTime < 500);
+          } catch (error) {
+            addTest("performance", "QR Generation Test", false);
+          }
+        } else {
+          addTest("performance", "QR Library Loaded", false);
+        }
+
+        renderTests("performance", "performance-tests");
+      }
+
+      // Run all tests when page loads
+      document.addEventListener("DOMContentLoaded", async () => {
+        console.log("🧪 Running QR Generator Tests...");
+
+        runBrowserTests();
+        runFeatureTests();
+        runPWATests();
+        await runPerformanceTests();
+
+        // Calculate overall score
+        const allTests = Object.values(results).flat();
+        const passedTests = allTests.filter((test) => test.passed);
+        const score = Math.round((passedTests.length / allTests.length) * 100);
+
+        console.log(
+          `✅ Test Results: ${passedTests.length}/${allTests.length} passed (${score}%)`
+        );
+
+        // Add summary
+        const summary = document.createElement("div");
+        summary.className = "test-section";
+        summary.innerHTML = `
+        <h2>📊 Test Summary</h2>
+        <div class="test-result ${score >= 80 ? "success" : "error"}">
+          <strong>Overall Score: ${score}%</strong><br>
+          ${passedTests.length} of ${allTests.length} tests passed
+        </div>
+      `;
+        document.body.appendChild(summary);
+      });
+
+      // Add QRCode library for testing
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js";
+      script.onload = () => console.log("📦 QRCode library loaded for testing");
+      document.head.appendChild(script);
+    </script>
+  </body>
+</html>
