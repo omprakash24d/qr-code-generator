@@ -13,6 +13,10 @@
     />
     <meta name="author" content="Om Prakash - omprakash24d" />
     <meta name="robots" content="index, follow" />
+    <meta
+      name="google-site-verification"
+      content="aFjux34HDYRi1ibQKeZEMl1t_L-Ewmzjokvv3xFWErg"
+    />
     <meta name="theme-color" content="#1a73e8" />
     <meta
       property="og:title"
@@ -47,7 +51,11 @@
     <title>
       Free QR Code Generator - Create Custom QR Codes Online | Om Prakash
     </title>
-    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./style.css?v=1.1" />
     <link rel="manifest" href="manifest.json" />
     <link
       rel="icon"
@@ -61,37 +69,46 @@
 
     <header class="header">
       <div class="container">
-        <h1 class="logo">📱 QR Code Generator</h1>
-        <button
-          class="theme-toggle"
-          id="theme-toggle"
-          aria-label="Toggle dark mode"
-          title="Toggle dark mode"
-        >
-          <span class="theme-icon" aria-hidden="true">🌙</span>
-          <span class="sr-only">Toggle dark mode</span>
-        </button>
+        <div class="header-content">
+          <div class="logo-section">
+            <div class="logo-icon">📱</div>
+            <div class="logo-text">
+              <h1 class="logo-title">QR Code Generator</h1>
+              <p class="logo-subtitle">Professional & Free</p>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button
+              class="theme-toggle"
+              id="theme-toggle"
+              aria-label="Toggle dark mode"
+              title="Toggle dark mode"
+            >
+              <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+            <button class="stats-btn" id="stats-btn" title="View Statistics">
+              <i class="fas fa-chart-bar"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
     <main id="main-content" class="main">
       <div class="container">
         <section class="hero">
-          <h2 class="hero-title">Create Custom QR Codes Instantly</h2>
-          <p class="hero-subtitle">
-            Generate professional QR codes with logo overlay and download in
-            multiple formats. Works offline and mobile-friendly.
-          </p>
+          <div class="hero-content">
+            <div class="hero-text">
+              <h2 class="hero-title">Create Custom QR Codes Instantly</h2>
+              <p class="hero-subtitle">
+                Generate professional QR codes quickly and easily. Works offline
+                and mobile-friendly.
+              </p>
+            </div>
+          </div>
         </section>
 
         <section class="generator-section">
-          <!-- Mode Selection Tabs -->
-          <div class="mode-tabs">
-            <button class="tab-btn active" data-tab="single">Single QR</button>
-            <button class="tab-btn" data-tab="batch">Batch QR</button>
-            <button class="tab-btn" data-tab="scan">Scan QR</button>
-          </div>
-
           <!-- Live Preview Panel -->
           <div
             class="live-preview-panel"
@@ -106,8 +123,7 @@
 
           <form
             id="qr-form"
-            class="qr-form tab-content active"
-            data-content="single"
+            class="qr-form"
             aria-label="QR Code Generator Form"
             novalidate
           >
@@ -246,107 +262,6 @@
             </button>
           </form>
 
-          <!-- Batch QR Form -->
-          <div class="tab-content" data-content="batch">
-            <div class="batch-form">
-              <h3>📦 Batch QR Code Generation</h3>
-
-              <div class="form-group">
-                <label class="form-label">Input Method</label>
-                <div class="input-method-tabs">
-                  <button
-                    type="button"
-                    class="method-btn active"
-                    data-method="csv"
-                  >
-                    Upload CSV
-                  </button>
-                  <button type="button" class="method-btn" data-method="text">
-                    Paste Text
-                  </button>
-                </div>
-              </div>
-
-              <!-- CSV Upload -->
-              <div class="method-content active" data-method-content="csv">
-                <div class="form-group">
-                  <div class="drag-drop-zone" id="csv-drop-zone">
-                    <input
-                      type="file"
-                      id="csv-upload"
-                      accept=".csv"
-                      class="file-input"
-                    />
-                    <div class="drag-content">
-                      <div class="drag-icon">📄</div>
-                      <p>Drag & drop your CSV file here</p>
-                      <span
-                        >or
-                        <button type="button" class="browse-btn">
-                          browse
-                        </button></span
-                      >
-                    </div>
-                  </div>
-                  <small class="help-text"
-                    >CSV format: url,label (one per line)</small
-                  >
-                </div>
-              </div>
-
-              <!-- Text Input -->
-              <div class="method-content" data-method-content="text">
-                <div class="form-group">
-                  <label for="batch-text" class="form-label"
-                    >URLs/Text (one per line)</label
-                  >
-                  <textarea
-                    id="batch-text"
-                    class="form-textarea"
-                    rows="8"
-                    placeholder="https://example1.com&#10;https://example2.com&#10;mailto:test@example.com"
-                  ></textarea>
-                </div>
-              </div>
-
-              <div class="batch-options">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="batch-size" class="form-label">Size</label>
-                    <select id="batch-size" class="form-select">
-                      <option value="256">Small</option>
-                      <option value="512" selected>Medium</option>
-                      <option value="1024">Large</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="batch-format" class="form-label">Format</label>
-                    <select id="batch-format" class="form-select">
-                      <option value="png">PNG</option>
-                      <option value="svg">SVG</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <button type="button" id="generate-batch" class="generate-btn">
-                <span class="btn-text">Generate Batch QR Codes</span>
-                <span class="btn-loader" aria-hidden="true"></span>
-              </button>
-
-              <div
-                class="batch-progress"
-                id="batch-progress"
-                style="display: none"
-              >
-                <div class="progress-bar">
-                  <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <span class="progress-text" id="progress-text">0 / 0</span>
-              </div>
-            </div>
-          </div>
-
           <!-- QR Scanner -->
           <div class="tab-content" data-content="scan">
             <div class="scanner-container">
@@ -391,6 +306,157 @@
                 <div class="scanned-content" id="scanned-content"></div>
                 <button type="button" id="copy-scanned" class="copy-btn">
                   Copy Text
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- QR Templates -->
+          <div class="tab-content" id="templates-tab">
+            <div class="templates-container">
+              <h3>🎨 QR Code Templates</h3>
+              <p class="templates-subtitle">Quick setup for common use cases</p>
+
+              <div class="templates-grid">
+                <div class="template-card" data-template="website">
+                  <div class="template-icon">🌐</div>
+                  <h4>Website Link</h4>
+                  <p>Create QR for your website or landing page</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="contact">
+                  <div class="template-icon">👤</div>
+                  <h4>Contact Card</h4>
+                  <p>vCard with name, phone, email, and address</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="wifi">
+                  <div class="template-icon">📶</div>
+                  <h4>WiFi Access</h4>
+                  <p>Share WiFi credentials easily</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="email">
+                  <div class="template-icon">✉️</div>
+                  <h4>Email</h4>
+                  <p>Pre-filled email with subject and body</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="sms">
+                  <div class="template-icon">💬</div>
+                  <h4>SMS Message</h4>
+                  <p>Send pre-written text message</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="location">
+                  <div class="template-icon">📍</div>
+                  <h4>Location</h4>
+                  <p>Share GPS coordinates or address</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="social">
+                  <div class="template-icon">📱</div>
+                  <h4>Social Media</h4>
+                  <p>Link to social media profiles</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+
+                <div class="template-card" data-template="calendar">
+                  <div class="template-icon">📅</div>
+                  <h4>Calendar Event</h4>
+                  <p>Add event to calendar with details</p>
+                  <button class="template-btn">Use Template</button>
+                </div>
+              </div>
+
+              <!-- Template Form -->
+              <div
+                class="template-form"
+                id="template-form"
+                style="display: none"
+              >
+                <h4 id="template-form-title">Configure Template</h4>
+                <div id="template-form-fields"></div>
+                <div class="template-form-actions">
+                  <button id="generate-from-template" class="generate-btn">
+                    Generate QR Code
+                  </button>
+                  <button id="cancel-template" class="cancel-btn">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Tab -->
+          <div class="tab-content" id="analytics-tab">
+            <div class="analytics-container">
+              <h3>📊 QR Code Analytics</h3>
+              <p class="analytics-subtitle">
+                Track your QR code usage and performance
+              </p>
+
+              <div class="analytics-stats">
+                <div class="stat-card">
+                  <div class="stat-icon">📱</div>
+                  <div class="stat-info">
+                    <h4 id="total-qr-count">0</h4>
+                    <p>Total QR Codes</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-icon">📦</div>
+                  <div class="stat-info">
+                    <h4 id="batch-qr-count">0</h4>
+                    <p>Batch Generated</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-icon">📷</div>
+                  <div class="stat-info">
+                    <h4 id="scanned-qr-count">0</h4>
+                    <p>QR Codes Scanned</p>
+                  </div>
+                </div>
+
+                <div class="stat-card">
+                  <div class="stat-icon">💾</div>
+                  <div class="stat-info">
+                    <h4 id="downloads-count">0</h4>
+                    <p>Downloads</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analytics-charts">
+                <div class="chart-card">
+                  <h4>QR Types Generated</h4>
+                  <canvas id="types-chart" width="300" height="200"></canvas>
+                </div>
+
+                <div class="chart-card">
+                  <h4>Daily Activity</h4>
+                  <canvas id="activity-chart" width="300" height="200"></canvas>
+                </div>
+              </div>
+
+              <div class="analytics-actions">
+                <button id="export-analytics" class="export-btn">
+                  <i class="fas fa-download"></i>
+                  Export Analytics
+                </button>
+                <button id="clear-analytics" class="clear-btn">
+                  <i class="fas fa-trash"></i>
+                  Clear Data
                 </button>
               </div>
             </div>
@@ -705,27 +771,9 @@
           </div>
         </div>
 
-        <!-- Search Console Code Area -->
-        <div class="search-console-area">
-          <div class="console-info">
-            <h4>🔍 Search Console Integration</h4>
-            <p>Add your Google Search Console verification code below:</p>
-          </div>
-          <div class="console-code-area">
-            <textarea
-              id="search-console-code"
-              placeholder="Paste your Google Search Console verification code here..."
-              rows="3"
-            ></textarea>
-            <button id="apply-console-code" class="apply-btn">
-              Apply Code
-            </button>
-          </div>
-        </div>
-
         <div class="footer-bottom">
           <p>
-            &copy; 2025 Om Prakash (omprakash24d). Built with ❤️ for the web.
+            &copy; 2025 Om Prakash Built with ❤️ for the web.
           </p>
         </div>
       </div>

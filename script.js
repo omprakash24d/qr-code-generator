@@ -1,513 +1,1191 @@
 /**
- * QR Code Generator - Enhanced JavaScript Module
- * Features: PWA support, dark mode, logo overlay, UTM tracking, accessibility
- * Author: Om
- * Version: 2.0
+ * QR Code Generator - Comprehensive JavaScript Module
+ * Features: PWA, dark mode, batch generation, scanning, social sharing, history
+ * Author: Om Prakash (omprakash24d)
+ * Version: 3.0
  */
 
 class QRGenerator {
   constructor() {
+    this.currentMode = "single";
+    this.batchQRs = [];
+    this.history = JSON.parse(localStorage.getItem("qr-history") || "[]");
+    this.scanner = null;
+    this.logoFile = null;
+    this.currentColors = { foreground: "#000000", background: "#ffffff" };
+    this.currentStyle = "squares";
+    this.deferredPrompt = null;
+
     this.init();
-    this.setupEventListeners();
-    this.registerServiceWorker();
-    this.initializeTheme();
   }
 
-  // Initialize DOM elements
   init() {
-    this.elements = {
-      form: document.getElementById("qr-form"),
-      qrText: document.getElementById("qr-text"),
-      logoInput: document.getElementById("logo-upload"),
-      qrSize: document.getElementById("qr-size"),
-      qrOutput: document.getElementById("qr-output"),
-      qrResult: document.getElementById("qr-result"),
-      downloadSection: document.getElementById("download-section"),
-      downloadPng: document.getElementById("download-png"),
-      downloadSvg: document.getElementById("download-svg"),
-      generateBtn: document.getElementById("generate-btn"),
-      themeToggle: document.getElementById("theme-toggle"),
-      toast: document.getElementById("toast"),
-    };
-
-    this.currentQRData = null;
-    this.currentSVGData = null;
-    this.initializeFAQ();
+    this.bindEvents();
+    this.loadTheme();
+    this.checkServiceWorkerSupport();
+    this.initializeModeTab();
+    this.setupPreview();
+    this.displayHistory();
+    this.checkPWAInstall();
   }
 
-  // Setup all event listeners
-  setupEventListeners() {
-    // Form submission
-    this.elements.form.addEventListener("submit", (e) =>
-      this.handleFormSubmit(e)
-    );
-
-    // Theme toggle
-    this.elements.themeToggle.addEventListener("click", () =>
-      this.toggleTheme()
-    );
-
-    // File upload
-    this.elements.logoInput.addEventListener("change", (e) =>
-      this.handleLogoUpload(e)
-    );
-
-    // Download buttons
-    this.elements.downloadPng.addEventListener("click", () =>
-      this.downloadPNG()
-    );
-    this.elements.downloadSvg.addEventListener("click", () =>
-      this.downloadSVG()
-    );
-
-    // Keyboard navigation
-    document.addEventListener("keydown", (e) => this.handleKeyboard(e));
-
-    // Form validation
-    this.elements.qrText.addEventListener("input", () => this.validateForm());
-
-    // Auto-save form data
-    this.elements.form.addEventListener("input", () => this.saveFormData());
-
-    // Load saved form data
-    this.loadFormData();
-  }
-
-  // Handle form submission
-  async handleFormSubmit(e) {
-    e.preventDefault();
-
-    if (!this.validateForm()) {
-      this.showToast("Please enter valid text or URL", "error");
-      return;
-    }
-
-    this.setLoading(true);
-
-    try {
-      const qrData = this.buildQRData();
-      const size = parseInt(this.elements.qrSize.value);
-
-      await this.generateQRCode(qrData, size);
-      this.showDownloadSection();
-      this.showToast("QR code generated successfully!", "success");
-
-      // Analytics tracking
-      this.trackEvent("qr_generated", {
-        size,
-        hasLogo: !!this.elements.logoInput.files[0],
-      });
-    } catch (error) {
-      console.error("QR generation error:", error);
-      this.showToast("Failed to generate QR code. Please try again.", "error");
-    } finally {
-      this.setLoading(false);
-    }
-  }
-
-  // Build QR data
-  buildQRData() {
-    return this.elements.qrText.value.trim();
-  }
-
-  // Generate QR code with logo overlay
-  async generateQRCode(text, size) {
-    // Clear previous output
-    this.elements.qrOutput.innerHTML = "";
-
-    // Create canvas
-    const canvas = document.createElement("canvas");
-
-    // QR code options
-    const options = {
-      width: size,
-      height: size,
-      margin: 2,
-      color: {
-        dark: getComputedStyle(document.documentElement)
-          .getPropertyValue("--text-primary")
-          .trim(),
-        light: getComputedStyle(document.documentElement)
-          .getPropertyValue("--bg-primary")
-          .trim(),
-      },
-      errorCorrectionLevel: "M",
-    };
-
-    // Generate QR code
-    await QRCode.toCanvas(canvas, text, options);
-
-    // Add logo overlay if file selected
-    if (this.elements.logoInput.files[0]) {
-      await this.addLogoOverlay(canvas);
-    }
-
-    // Store canvas data
-    this.currentQRData = canvas;
-
-    // Generate SVG version
-    await this.generateSVGVersion(text, options);
-
-    // Add to DOM with animation
-    this.elements.qrOutput.appendChild(canvas);
-
-    // Add accessibility attributes
-    canvas.setAttribute("role", "img");
-    canvas.setAttribute("aria-label", `QR code for: ${text}`);
-  }
-
-  // Add logo overlay to canvas
-  async addLogoOverlay(canvas) {
-    const ctx = canvas.getContext("2d");
-    const logoFile = this.elements.logoInput.files[0];
-
-    return new Promise((resolve, reject) => {
-      const logo = new Image();
-
-      logo.onload = () => {
-        try {
-          // Calculate logo size (15% of QR code)
-          const logoSize = Math.min(canvas.width, canvas.height) * 0.15;
-          const x = (canvas.width - logoSize) / 2;
-          const y = (canvas.height - logoSize) / 2;
-
-          // Draw white background circle
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.arc(
-            canvas.width / 2,
-            canvas.height / 2,
-            logoSize / 2 + 5,
-            0,
-            2 * Math.PI
-          );
-          ctx.fill();
-
-          // Draw logo
-          ctx.drawImage(logo, x, y, logoSize, logoSize);
-
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      logo.onerror = () => reject(new Error("Failed to load logo"));
-      logo.src = URL.createObjectURL(logoFile);
+  bindEvents() {
+    // Basic QR generation
+    document.getElementById("text").addEventListener("input", () => {
+      this.generateQR();
+      this.detectContentType();
     });
-  }
+    document
+      .getElementById("size")
+      .addEventListener("input", () => this.generateQR());
+    document
+      .getElementById("error-level")
+      .addEventListener("change", () => this.generateQR());
+    document
+      .getElementById("format")
+      .addEventListener("change", () => this.updateDownloadButton());
+    document
+      .getElementById("download")
+      .addEventListener("click", () => this.downloadQR());
+    document
+      .getElementById("copy-link")
+      .addEventListener("click", () => this.copyQRData());
 
-  // Generate SVG version
-  async generateSVGVersion(text, options) {
-    return new Promise((resolve) => {
-      QRCode.toString(
-        text,
-        {
-          type: "svg",
-          width: options.width,
-          height: options.height,
-          margin: options.margin,
-          color: options.color,
-          errorCorrectionLevel: options.errorCorrectionLevel,
-        },
-        (err, svg) => {
-          if (!err) {
-            this.currentSVGData = svg;
-          }
-          resolve();
-        }
+    // Mode tabs
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) =>
+        this.switchMode(e.target.dataset.mode)
       );
     });
+
+    // Color pickers
+    document
+      .getElementById("foreground-color")
+      .addEventListener("input", () => this.updateColors());
+    document
+      .getElementById("background-color")
+      .addEventListener("input", () => this.updateColors());
+    document
+      .getElementById("reset-colors")
+      .addEventListener("click", () => this.resetColors());
+
+    // Logo upload
+    const logoUpload = document.getElementById("logo-upload");
+    if (logoUpload) {
+      logoUpload.addEventListener("change", (e) => this.handleLogoUpload(e));
+    }
+
+    const logoDropZone = document.getElementById("logo-drag-zone");
+    if (logoDropZone) {
+      logoDropZone.addEventListener("click", () =>
+        document.getElementById("logo-upload").click()
+      );
+      this.setupDragAndDrop();
+    }
+
+    // QR Style options
+    document.querySelectorAll('input[name="qr-style"]').forEach((radio) => {
+      radio.addEventListener("change", (e) =>
+        this.updateQRStyle(e.target.value)
+      );
+    });
+
+    // Batch generation
+    document.querySelectorAll(".method-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) =>
+        this.switchInputMethod(e.target.dataset.method)
+      );
+    });
+
+    const csvUpload = document.getElementById("csv-upload");
+    if (csvUpload) {
+      csvUpload.addEventListener("change", (e) => this.handleCSVUpload(e));
+    }
+
+    const generateBatch = document.getElementById("generate-batch");
+    if (generateBatch) {
+      generateBatch.addEventListener("click", () => this.generateBatchQRs());
+    }
+
+    const downloadBatch = document.getElementById("download-batch");
+    if (downloadBatch) {
+      downloadBatch.addEventListener("click", () => this.downloadBatchZip());
+    }
+
+    // Scanner
+    const startScan = document.getElementById("start-scan");
+    const stopScan = document.getElementById("stop-scan");
+    const copyResult = document.getElementById("copy-result");
+
+    if (startScan)
+      startScan.addEventListener("click", () => this.startScanning());
+    if (stopScan) stopScan.addEventListener("click", () => this.stopScanning());
+    if (copyResult)
+      copyResult.addEventListener("click", () => this.copyScannedResult());
+
+    // Social sharing
+    const shareWhatsapp = document.getElementById("share-whatsapp");
+    const shareTwitter = document.getElementById("share-twitter");
+    const shareEmail = document.getElementById("share-email");
+    const shareCopy = document.getElementById("share-copy");
+
+    if (shareWhatsapp)
+      shareWhatsapp.addEventListener("click", () => this.shareToWhatsApp());
+    if (shareTwitter)
+      shareTwitter.addEventListener("click", () => this.shareToTwitter());
+    if (shareEmail)
+      shareEmail.addEventListener("click", () => this.shareToEmail());
+    if (shareCopy)
+      shareCopy.addEventListener("click", () => this.copyQRImage());
+
+    // PWA
+    const installPWA = document.getElementById("install-pwa");
+    const dismissBanner = document.getElementById("dismiss-banner");
+
+    if (installPWA)
+      installPWA.addEventListener("click", () => this.installPWA());
+    if (dismissBanner)
+      dismissBanner.addEventListener("click", () =>
+        this.dismissInstallBanner()
+      );
+
+    // History
+    const clearHistory = document.getElementById("clear-history");
+    const exportHistory = document.getElementById("export-history");
+
+    if (clearHistory)
+      clearHistory.addEventListener("click", () => this.clearHistory());
+    if (exportHistory)
+      exportHistory.addEventListener("click", () => this.exportHistory());
+
+    // Theme toggle
+    document
+      .getElementById("theme-toggle")
+      .addEventListener("click", () => this.toggleTheme());
+
+    // FAQ toggles
+    document.querySelectorAll(".faq-question").forEach((question) => {
+      question.addEventListener("click", () => this.toggleFAQ(question));
+    });
+
+    // Input validation
+    document
+      .getElementById("text")
+      .addEventListener("input", () => this.validateInput());
+
+    // Search console
+    const generateConsoleQR = document.getElementById("generate-console-qr");
+    if (generateConsoleQR) {
+      generateConsoleQR.addEventListener("click", () =>
+        this.generateSearchConsoleQR()
+      );
+    }
   }
 
-  // Show download section with animation
-  showDownloadSection() {
-    this.elements.qrResult.style.display = "block";
-    this.elements.downloadSection.classList.add("visible");
+  initializeModeTab() {
+    this.switchMode("single");
+  }
 
-    // Smooth scroll to result
-    this.elements.qrOutput.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
+  switchMode(mode) {
+    this.currentMode = mode;
+
+    // Update tab buttons
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+
+    // Update tab content
+    document.querySelectorAll(".tab-content").forEach((content) => {
+      content.classList.toggle("active", content.id === `${mode}-tab`);
+    });
+
+    if (mode === "scan") {
+      this.initializeScanner();
+    } else if (mode === "single") {
+      this.generateQR();
+    }
+  }
+
+  setupPreview() {
+    const canvas = document.getElementById("preview-canvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    canvas.width = 200;
+    canvas.height = 200;
+
+    // Draw placeholder
+    ctx.fillStyle = "#f0f0f0";
+    ctx.fillRect(0, 0, 200, 200);
+    ctx.strokeStyle = "#ccc";
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(10, 10, 180, 180);
+
+    ctx.fillStyle = "#999";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Live Preview", 100, 105);
+  }
+
+  detectContentType() {
+    const text = document.getElementById("text").value.trim();
+    const indicator = document.querySelector(".content-type-indicator");
+
+    if (!indicator || !text) {
+      if (indicator) indicator.textContent = "";
+      return;
+    }
+
+    if (text.match(/^https?:\/\//)) {
+      indicator.textContent = "🔗 URL";
+    } else if (text.match(/^mailto:/)) {
+      indicator.textContent = "📧 Email";
+    } else if (text.match(/^tel:/)) {
+      indicator.textContent = "📞 Phone";
+    } else if (text.match(/^wifi:/i)) {
+      indicator.textContent = "📶 WiFi";
+    } else if (text.includes("@") && text.includes(".")) {
+      indicator.textContent = "📧 Email";
+    } else {
+      indicator.textContent = "📝 Text";
+    }
+  }
+
+  updateColors() {
+    this.currentColors.foreground =
+      document.getElementById("foreground-color").value;
+    this.currentColors.background =
+      document.getElementById("background-color").value;
+
+    this.checkContrast();
+    this.generateQR();
+  }
+
+  resetColors() {
+    this.currentColors = { foreground: "#000000", background: "#ffffff" };
+    document.getElementById("foreground-color").value = "#000000";
+    document.getElementById("background-color").value = "#ffffff";
+    this.generateQR();
+  }
+
+  checkContrast() {
+    const contrast = this.calculateContrast(
+      this.currentColors.foreground,
+      this.currentColors.background
+    );
+    const indicator = document.querySelector(".contrast-indicator");
+
+    if (!indicator) return;
+
+    if (contrast >= 4.5) {
+      indicator.className = "contrast-indicator good";
+      indicator.textContent = `✅ Good contrast (${contrast.toFixed(1)}:1)`;
+    } else {
+      indicator.className = "contrast-indicator poor";
+      indicator.textContent = `⚠️ Poor contrast (${contrast.toFixed(1)}:1)`;
+    }
+  }
+
+  calculateContrast(color1, color2) {
+    const lum1 = this.getLuminance(color1);
+    const lum2 = this.getLuminance(color2);
+    const brightest = Math.max(lum1, lum2);
+    const darkest = Math.min(lum1, lum2);
+    return (brightest + 0.05) / (darkest + 0.05);
+  }
+
+  getLuminance(hex) {
+    const rgb = this.hexToRgb(hex);
+    if (!rgb) return 0;
+
+    const rsRGB = rgb.r / 255;
+    const gsRGB = rgb.g / 255;
+    const bsRGB = rgb.b / 255;
+
+    const r =
+      rsRGB <= 0.03928 ? rsRGB / 12.92 : Math.pow((rsRGB + 0.055) / 1.055, 2.4);
+    const g =
+      gsRGB <= 0.03928 ? gsRGB / 12.92 : Math.pow((gsRGB + 0.055) / 1.055, 2.4);
+    const b =
+      bsRGB <= 0.03928 ? bsRGB / 12.92 : Math.pow((bsRGB + 0.055) / 1.055, 2.4);
+
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
+  }
+
+  setupDragAndDrop() {
+    const dropZone = document.getElementById("logo-drag-zone");
+    if (!dropZone) return;
+
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, () =>
+        dropZone.classList.add("drag-over")
+      );
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropZone.addEventListener(eventName, () =>
+        dropZone.classList.remove("drag-over")
+      );
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        this.handleLogoFile(files[0]);
+      }
     });
   }
 
-  // Download PNG
-  downloadPNG() {
-    if (!this.currentQRData) return;
-
-    const link = document.createElement("a");
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
-
-    link.download = `qr-code-${timestamp}.png`;
-    link.href = this.currentQRData.toDataURL("image/png", 1.0);
-
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    this.showToast("PNG downloaded successfully!", "success");
-    this.trackEvent("download", { format: "png" });
-  }
-
-  // Download SVG
-  downloadSVG() {
-    if (!this.currentSVGData) return;
-
-    const blob = new Blob([this.currentSVGData], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
-
-    link.download = `qr-code-${timestamp}.svg`;
-    link.href = url;
-
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Cleanup
-    URL.revokeObjectURL(url);
-
-    this.showToast("SVG downloaded successfully!", "success");
-    this.trackEvent("download", { format: "svg" });
-  }
-
-  // Handle logo upload
-  handleLogoUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      this.showToast("Logo file too large. Maximum size: 2MB", "error");
-      e.target.value = "";
-      return;
+  handleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      this.handleLogoFile(file);
     }
+  }
 
-    // Validate file type
+  handleLogoFile(file) {
     if (!file.type.startsWith("image/")) {
-      this.showToast("Please select a valid image file", "error");
-      e.target.value = "";
+      alert("Please select a valid image file");
       return;
     }
 
-    // Update file label
-    const label = e.target.nextElementSibling.querySelector(".file-text");
-    label.textContent = file.name;
+    this.logoFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const preview = document.querySelector(".file-preview");
+      if (preview) {
+        const image = preview.querySelector(".preview-image");
+        const info = preview.querySelector(".preview-info");
 
-    this.showToast("Logo uploaded successfully!", "success");
+        if (image) image.src = e.target.result;
+        if (info)
+          info.textContent = `${file.name} (${(file.size / 1024).toFixed(
+            1
+          )} KB)`;
+        preview.classList.add("active");
+      }
+
+      this.generateQR();
+    };
+    reader.readAsDataURL(file);
   }
 
-  // Form validation
-  validateForm() {
-    const text = this.elements.qrText.value.trim();
-    const isValid = text.length > 0;
+  updateQRStyle(style) {
+    this.currentStyle = style;
+    this.generateQR();
+  }
 
-    // Update button state
-    this.elements.generateBtn.disabled = !isValid;
+  async generateQR() {
+    const text = document.getElementById("text").value.trim();
 
-    // URL validation for better UX
-    if (text && this.isURL(text)) {
-      this.elements.qrText.type = "url";
+    if (!text) {
+      const qrSection = document.getElementById("qr-section");
+      if (qrSection) qrSection.style.display = "none";
+      this.clearPreview();
+      return;
+    }
+
+    const size = parseInt(document.getElementById("size").value) || 256;
+    const errorLevel = document.getElementById("error-level").value || "M";
+    const textBelow = document.getElementById("text-below")
+      ? document.getElementById("text-below").value
+      : "";
+
+    // Clear existing QR
+    const qrContainer = document.getElementById("qrcode");
+    if (qrContainer) qrContainer.innerHTML = "";
+
+    // Check if QRCodeStyling is available
+    if (typeof QRCodeStyling !== "undefined") {
+      // Use QR-Code-Styling for advanced styling
+      const qrCode = new QRCodeStyling({
+        width: size,
+        height: size,
+        data: text,
+        qrOptions: {
+          errorCorrectionLevel: errorLevel,
+        },
+        dotsOptions: {
+          color: this.currentColors.foreground,
+          type: this.currentStyle,
+        },
+        backgroundOptions: {
+          color: this.currentColors.background,
+        },
+        imageOptions: {
+          crossOrigin: "anonymous",
+          margin: 10,
+        },
+      });
+
+      // Add logo if available
+      if (this.logoFile) {
+        const logoUrl = URL.createObjectURL(this.logoFile);
+        qrCode.update({
+          image: logoUrl,
+        });
+      }
+
+      if (qrContainer) {
+        qrCode.append(qrContainer);
+        this.updatePreview(qrCode);
+      }
     } else {
-      this.elements.qrText.type = "text";
+      // Fallback to basic QRCode.js
+      if (qrContainer && typeof QRCode !== "undefined") {
+        new QRCode(qrContainer, {
+          text: text,
+          width: size,
+          height: size,
+          colorDark: this.currentColors.foreground,
+          colorLight: this.currentColors.background,
+          correctLevel:
+            QRCode.CorrectLevel[errorLevel] || QRCode.CorrectLevel.M,
+        });
+      }
     }
 
-    return isValid;
+    // Add text below if specified
+    if (textBelow && qrContainer) {
+      const textDiv = document.createElement("div");
+      textDiv.style.cssText =
+        "text-align: center; margin-top: 10px; font-size: 14px; color: var(--text-primary);";
+      textDiv.textContent = textBelow;
+      qrContainer.appendChild(textDiv);
+    }
+
+    const qrSection = document.getElementById("qr-section");
+    if (qrSection) qrSection.style.display = "block";
+
+    this.updateDownloadButton();
+    this.validateInput();
+
+    // Save to history
+    this.saveToHistory(text, size, this.currentColors, this.currentStyle);
   }
 
-  // Check if text is a URL
-  isURL(text) {
+  updatePreview(qrCode) {
+    const canvas = document.getElementById("preview-canvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Get QR canvas and draw scaled version
+    setTimeout(() => {
+      const qrCanvas = document.querySelector("#qrcode canvas");
+      if (qrCanvas) {
+        ctx.drawImage(qrCanvas, 0, 0, 200, 200);
+      }
+    }, 100);
+  }
+
+  clearPreview() {
+    const canvas = document.getElementById("preview-canvas");
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.setupPreview();
+    }
+  }
+
+  switchInputMethod(method) {
+    document.querySelectorAll(".method-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.method === method);
+    });
+
+    document.querySelectorAll(".method-content").forEach((content) => {
+      content.classList.toggle("active", content.dataset.method === method);
+    });
+  }
+
+  handleCSVUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csv = e.target.result;
+        this.parseCSVData(csv);
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  parseCSVData(csv) {
+    const lines = csv.split("\n").filter((line) => line.trim());
+    const textarea = document.getElementById("batch-text-input");
+    if (textarea) {
+      const data = lines.map((line) => {
+        const [text, filename] = line.split(",").map((item) => item.trim());
+        return filename ? `${text}|${filename}` : text;
+      });
+      textarea.value = data.join("\n");
+    }
+  }
+
+  async generateBatchQRs() {
+    const textInput = document.getElementById("batch-text-input");
+    if (!textInput || !textInput.value.trim()) {
+      alert("Please enter text data for batch generation");
+      return;
+    }
+
+    const lines = textInput.value.split("\n").filter((line) => line.trim());
+    const batchSize = document.getElementById("batch-size");
+    const batchFormat = document.getElementById("batch-format");
+    const size = batchSize ? parseInt(batchSize.value) : 256;
+    const format = batchFormat ? batchFormat.value : "png";
+
+    this.batchQRs = [];
+    const progressBar = document.querySelector(".progress-fill");
+    const progressText = document.querySelector(".progress-text");
+    const batchProgress = document.querySelector(".batch-progress");
+
+    if (batchProgress) batchProgress.style.display = "block";
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      const [text, filename] = line.includes("|")
+        ? line.split("|")
+        : [line, `qr_${i + 1}`];
+
+      // Update progress
+      const progress = ((i + 1) / lines.length) * 100;
+      if (progressBar) progressBar.style.width = `${progress}%`;
+      if (progressText)
+        progressText.textContent = `Generating ${i + 1} of ${lines.length}...`;
+
+      // Generate QR using available library
+      if (typeof QRCodeStyling !== "undefined") {
+        const qrCode = new QRCodeStyling({
+          width: size,
+          height: size,
+          data: text,
+          qrOptions: { errorCorrectionLevel: "M" },
+          dotsOptions: {
+            color: this.currentColors.foreground,
+            type: this.currentStyle,
+          },
+          backgroundOptions: { color: this.currentColors.background },
+        });
+
+        try {
+          const blob = await qrCode.getRawData(
+            format === "png" ? "png" : "jpeg"
+          );
+          this.batchQRs.push({
+            filename: `${filename}.${format}`,
+            blob: blob,
+            text: text,
+          });
+        } catch (error) {
+          console.error("Failed to generate QR for:", text, error);
+        }
+      } else {
+        // Fallback: generate using canvas
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+
+        try {
+          if (typeof QRCode !== "undefined") {
+            await new Promise((resolve, reject) => {
+              QRCode.toCanvas(
+                canvas,
+                text,
+                {
+                  width: size,
+                  height: size,
+                  color: {
+                    dark: this.currentColors.foreground,
+                    light: this.currentColors.background,
+                  },
+                },
+                (error) => {
+                  if (error) reject(error);
+                  else resolve();
+                }
+              );
+            });
+
+            canvas.toBlob(
+              (blob) => {
+                if (blob) {
+                  this.batchQRs.push({
+                    filename: `${filename}.${format}`,
+                    blob: blob,
+                    text: text,
+                  });
+                }
+              },
+              `image/${format}`,
+              0.9
+            );
+          }
+        } catch (error) {
+          console.error("Failed to generate QR for:", text, error);
+        }
+      }
+
+      // Small delay to prevent UI blocking
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    if (progressText)
+      progressText.textContent = `Generated ${lines.length} QR codes successfully!`;
+
+    const downloadBatch = document.getElementById("download-batch");
+    if (downloadBatch) downloadBatch.disabled = false;
+  }
+
+  async downloadBatchZip() {
+    if (this.batchQRs.length === 0) {
+      alert("No QR codes to download");
+      return;
+    }
+
+    if (typeof JSZip === "undefined") {
+      alert("Batch download not available - JSZip library not loaded");
+      return;
+    }
+
+    const zip = new JSZip();
+
+    this.batchQRs.forEach((qr) => {
+      zip.file(qr.filename, qr.blob);
+    });
+
+    // Add manifest file
+    const manifest = this.batchQRs.map((qr) => ({
+      filename: qr.filename,
+      text: qr.text,
+      generated: new Date().toISOString(),
+    }));
+    zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+
     try {
-      new URL(text);
-      return true;
-    } catch {
-      return text.startsWith("http://") || text.startsWith("https://");
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(zipBlob);
+      link.download = `qr_batch_${new Date().getTime()}.zip`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Failed to create ZIP file:", error);
+      alert("Failed to create download file");
     }
   }
 
-  // Theme management
-  initializeTheme() {
-    const savedTheme = localStorage.getItem("qr-generator-theme") || "light";
-    this.setTheme(savedTheme);
+  async initializeScanner() {
+    if (!this.scanner && typeof QrScanner !== "undefined") {
+      try {
+        const video = document.getElementById("camera-feed");
+        if (video) {
+          this.scanner = new QrScanner(
+            video,
+            (result) => this.handleScanResult(result),
+            {
+              highlightScanRegion: true,
+              highlightCodeOutline: true,
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Scanner initialization failed:", error);
+        const scannerContainer = document.querySelector(".scanner-container");
+        if (scannerContainer) {
+          scannerContainer.innerHTML =
+            "<p>Camera scanning not supported on this device/browser</p>";
+        }
+      }
+    }
+  }
+
+  async startScanning() {
+    if (this.scanner) {
+      try {
+        await this.scanner.start();
+        const startBtn = document.getElementById("start-scan");
+        const stopBtn = document.getElementById("stop-scan");
+        if (startBtn) startBtn.disabled = true;
+        if (stopBtn) stopBtn.disabled = false;
+      } catch (error) {
+        alert("Camera access denied or not available");
+        console.error("Scanner start failed:", error);
+      }
+    }
+  }
+
+  stopScanning() {
+    if (this.scanner) {
+      this.scanner.stop();
+      const startBtn = document.getElementById("start-scan");
+      const stopBtn = document.getElementById("stop-scan");
+      if (startBtn) startBtn.disabled = false;
+      if (stopBtn) stopBtn.disabled = true;
+    }
+  }
+
+  handleScanResult(result) {
+    const resultText = document.getElementById("scan-result-text");
+    const scanResult = document.querySelector(".scan-result");
+
+    if (resultText) resultText.textContent = result.data;
+    if (scanResult) scanResult.style.display = "block";
+
+    // Auto-detect and format result
+    const data = result.data;
+    if (data.startsWith("http") && resultText) {
+      resultText.innerHTML = `<a href="${data}" target="_blank" rel="noopener">${data}</a>`;
+    }
+  }
+
+  copyScannedResult() {
+    const resultText = document.getElementById("scan-result-text");
+    const result = resultText ? resultText.textContent : "";
+    if (result) {
+      navigator.clipboard.writeText(result).then(() => {
+        const btn = document.getElementById("copy-result");
+        if (btn) {
+          const originalText = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => {
+            btn.textContent = originalText;
+          }, 2000);
+        }
+      });
+    }
+  }
+
+  shareToWhatsApp() {
+    const text = document.getElementById("text").value.trim();
+    if (text) {
+      const message = encodeURIComponent(`Check out this QR code: ${text}`);
+      window.open(`https://wa.me/?text=${message}`, "_blank");
+    }
+  }
+
+  shareToTwitter() {
+    const text = encodeURIComponent("Check out this QR Code I generated!");
+    const url = encodeURIComponent(window.location.href);
+    window.open(
+      `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      "_blank"
+    );
+  }
+
+  shareToEmail() {
+    const text = document.getElementById("text").value.trim();
+    const subject = encodeURIComponent("QR Code");
+    const body = encodeURIComponent(
+      `Check out this QR code content: ${text}\n\nGenerated at: ${window.location.href}`
+    );
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+  }
+
+  async copyQRImage() {
+    const canvas = document.querySelector("#qrcode canvas");
+    if (canvas) {
+      try {
+        canvas.toBlob((blob) => {
+          if (navigator.clipboard && navigator.clipboard.write) {
+            navigator.clipboard
+              .write([new ClipboardItem({ "image/png": blob })])
+              .then(() => {
+                const btn = document.getElementById("share-copy");
+                if (btn) {
+                  const originalText = btn.textContent;
+                  btn.textContent = "Copied!";
+                  setTimeout(() => {
+                    btn.textContent = originalText;
+                  }, 2000);
+                }
+              });
+          } else {
+            // Fallback to copying text
+            this.copyQRData();
+          }
+        });
+      } catch (error) {
+        // Fallback to copying text
+        this.copyQRData();
+      }
+    }
+  }
+
+  saveToHistory(text, size, colors, style) {
+    const historyItem = {
+      id: Date.now(),
+      text: text.substring(0, 50) + (text.length > 50 ? "..." : ""),
+      fullText: text,
+      size,
+      colors: { ...colors },
+      style,
+      date: new Date().toISOString(),
+    };
+
+    this.history.unshift(historyItem);
+    if (this.history.length > 50) {
+      this.history = this.history.slice(0, 50);
+    }
+
+    localStorage.setItem("qr-history", JSON.stringify(this.history));
+    this.displayHistory();
+  }
+
+  displayHistory() {
+    const historySection = document.getElementById("history-section");
+    if (!historySection) return;
+
+    if (this.history.length === 0) {
+      historySection.style.display = "none";
+      return;
+    }
+
+    historySection.style.display = "block";
+    const grid = document.querySelector(".history-grid");
+    if (!grid) return;
+
+    grid.innerHTML = this.history
+      .map(
+        (item) => `
+      <div class="history-item" data-id="${item.id}">
+        <div class="history-qr" data-text="${item.fullText}" data-size="${
+          item.size
+        }"></div>
+        <div class="history-info">${item.text}</div>
+        <div class="history-date">${new Date(
+          item.date
+        ).toLocaleDateString()}</div>
+        <div class="history-actions">
+          <button class="history-btn" onclick="qrGenerator.applyFromHistory(${
+            item.id
+          })">Apply</button>
+          <button class="history-btn" onclick="qrGenerator.downloadFromHistory(${
+            item.id
+          })">Download</button>
+          <button class="history-btn" onclick="qrGenerator.removeFromHistory(${
+            item.id
+          })">Remove</button>
+        </div>
+      </div>
+    `
+      )
+      .join("");
+
+    // Generate mini QR codes
+    this.history.forEach((item) => {
+      const container = document.querySelector(
+        `[data-id="${item.id}"] .history-qr`
+      );
+      if (container && typeof QRCodeStyling !== "undefined") {
+        try {
+          const miniQR = new QRCodeStyling({
+            width: 80,
+            height: 80,
+            data: item.fullText,
+            dotsOptions: { color: item.colors.foreground, type: item.style },
+            backgroundOptions: { color: item.colors.background },
+          });
+          miniQR.append(container);
+        } catch (error) {
+          console.error("Failed to generate mini QR:", error);
+        }
+      }
+    });
+  }
+
+  applyFromHistory(id) {
+    const item = this.history.find((h) => h.id === id);
+    if (item) {
+      document.getElementById("text").value = item.fullText;
+      document.getElementById("size").value = item.size;
+      document.getElementById("foreground-color").value =
+        item.colors.foreground;
+      document.getElementById("background-color").value =
+        item.colors.background;
+
+      const styleRadio = document.querySelector(
+        `input[name="qr-style"][value="${item.style}"]`
+      );
+      if (styleRadio) styleRadio.checked = true;
+
+      this.currentColors = { ...item.colors };
+      this.currentStyle = item.style;
+      this.generateQR();
+
+      // Switch to single mode
+      this.switchMode("single");
+    }
+  }
+
+  downloadFromHistory(id) {
+    const item = this.history.find((h) => h.id === id);
+    if (item) {
+      this.applyFromHistory(id);
+      setTimeout(() => this.downloadQR(), 500);
+    }
+  }
+
+  removeFromHistory(id) {
+    this.history = this.history.filter((h) => h.id !== id);
+    localStorage.setItem("qr-history", JSON.stringify(this.history));
+    this.displayHistory();
+  }
+
+  clearHistory() {
+    if (confirm("Are you sure you want to clear all history?")) {
+      this.history = [];
+      localStorage.removeItem("qr-history");
+      this.displayHistory();
+    }
+  }
+
+  exportHistory() {
+    const data = JSON.stringify(this.history, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `qr_history_${new Date().getTime()}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  generateSearchConsoleQR() {
+    const code = document.getElementById("search-console-code");
+    if (code && code.value.trim()) {
+      document.getElementById("text").value = code.value.trim();
+      this.switchMode("single");
+      this.generateQR();
+    }
+  }
+
+  checkPWAInstall() {
+    // Check if app is already installed
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      const banner = document.querySelector(".pwa-install-banner");
+      if (banner) banner.style.display = "none";
+    }
+  }
+
+  dismissInstallBanner() {
+    const banner = document.querySelector(".pwa-install-banner");
+    if (banner) banner.style.display = "none";
+    localStorage.setItem("pwa-banner-dismissed", "true");
+  }
+
+  installPWA() {
+    if (this.deferredPrompt) {
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === "accepted") {
+          console.log("User accepted PWA install");
+        }
+        this.deferredPrompt = null;
+      });
+    }
+  }
+
+  updateCharacterCount() {
+    const text = document.getElementById("text").value;
+    const count = text.length;
+    const counter = document.getElementById("char-count");
+
+    if (counter) {
+      counter.textContent = `${count} characters`;
+
+      if (count > 2000) {
+        counter.style.color = "var(--error)";
+      } else if (count > 1500) {
+        counter.style.color = "var(--warning)";
+      } else {
+        counter.style.color = "var(--text-secondary)";
+      }
+    }
+  }
+
+  validateInput() {
+    const text = document.getElementById("text").value;
+    const validation = document.getElementById("input-validation");
+
+    if (validation) {
+      if (text.length > 2000) {
+        validation.textContent =
+          "⚠️ Text is very long and may not scan reliably";
+        validation.style.color = "var(--error)";
+      } else if (text.length > 1500) {
+        validation.textContent =
+          "⚠️ Text is long, consider shortening for better scanning";
+        validation.style.color = "var(--warning)";
+      } else if (text.length === 0) {
+        validation.textContent = "";
+      } else {
+        validation.textContent = "✅ Good length for QR code";
+        validation.style.color = "var(--success)";
+      }
+    }
+
+    this.updateCharacterCount();
+  }
+
+  downloadQR() {
+    const format = document.getElementById("format").value;
+    const text = document.getElementById("text").value.trim();
+
+    if (!text) {
+      alert("Please enter text to generate QR code");
+      return;
+    }
+
+    const qrCanvas = document.querySelector("#qrcode canvas");
+    if (!qrCanvas) {
+      alert("Please generate QR code first");
+      return;
+    }
+
+    const link = document.createElement("a");
+
+    if (format === "svg") {
+      const svg = document.querySelector("#qrcode svg");
+      if (svg) {
+        const serializer = new XMLSerializer();
+        const svgBlob = new Blob([serializer.serializeToString(svg)], {
+          type: "image/svg+xml",
+        });
+        link.href = URL.createObjectURL(svgBlob);
+        link.download = "qrcode.svg";
+      }
+    } else {
+      link.href = qrCanvas.toDataURL(`image/${format}`, 0.9);
+      link.download = `qrcode.${format}`;
+    }
+
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  updateDownloadButton() {
+    const text = document.getElementById("text").value.trim();
+    const downloadBtn = document.getElementById("download");
+    if (downloadBtn) {
+      downloadBtn.disabled = !text;
+    }
+  }
+
+  copyQRData() {
+    const text = document.getElementById("text").value.trim();
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById("copy-link");
+        if (btn) {
+          const originalText = btn.textContent;
+          btn.textContent = "Copied!";
+          btn.style.background = "var(--success)";
+
+          setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = "";
+          }, 2000);
+        }
+      });
+    }
   }
 
   toggleTheme() {
-    const currentTheme =
-      document.documentElement.getAttribute("data-theme") || "light";
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    this.setTheme(newTheme);
-  }
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
 
-  setTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("qr-generator-theme", theme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("qr-theme", newTheme);
 
-    // Update theme toggle icon
-    const icon = this.elements.themeToggle.querySelector(".theme-icon");
-    icon.textContent = theme === "dark" ? "☀️" : "🌙";
-
-    // Update meta theme color
-    const metaTheme = document.querySelector('meta[name="theme-color"]');
-    metaTheme.content = theme === "dark" ? "#0f172a" : "#1a73e8";
-  }
-
-  // Loading state management
-  setLoading(loading) {
-    this.elements.generateBtn.classList.toggle("loading", loading);
-    this.elements.generateBtn.disabled = loading;
-
-    if (loading) {
-      this.elements.downloadSection.classList.remove("visible");
-      this.elements.qrResult.style.display = "none";
+    const icon = document.querySelector("#theme-toggle i");
+    if (icon) {
+      icon.className = newTheme === "dark" ? "fas fa-sun" : "fas fa-moon";
     }
   }
 
-  // Toast notifications
-  showToast(message, type = "info") {
-    const toast = this.elements.toast;
+  loadTheme() {
+    const savedTheme =
+      localStorage.getItem("qr-theme") ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light");
 
-    toast.textContent = message;
-    toast.className = `toast ${type}`;
-    toast.classList.add("show");
+    document.documentElement.setAttribute("data-theme", savedTheme);
 
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, 3000);
-  }
-
-  // Keyboard navigation
-  handleKeyboard(e) {
-    // Generate on Ctrl/Cmd + Enter
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-      e.preventDefault();
-      if (!this.elements.generateBtn.disabled) {
-        this.handleFormSubmit(e);
-      }
-    }
-
-    // Theme toggle on Ctrl/Cmd + D
-    if ((e.ctrlKey || e.metaKey) && e.key === "d") {
-      e.preventDefault();
-      this.toggleTheme();
+    const icon = document.querySelector("#theme-toggle i");
+    if (icon) {
+      icon.className = savedTheme === "dark" ? "fas fa-sun" : "fas fa-moon";
     }
   }
 
-  // Initialize FAQ interactivity
-  initializeFAQ() {
-    const faqQuestions = document.querySelectorAll(".faq-question");
+  toggleFAQ(element) {
+    const answer = element.nextElementSibling;
+    const icon = element.querySelector("i");
 
-    faqQuestions.forEach((question) => {
-      question.addEventListener("click", () => {
-        const isExpanded = question.getAttribute("aria-expanded") === "true";
-        const answer = question.nextElementSibling;
+    if (answer) {
+      answer.style.display =
+        answer.style.display === "block" ? "none" : "block";
+    }
 
-        // Close all other FAQs
-        faqQuestions.forEach((otherQuestion) => {
-          if (otherQuestion !== question) {
-            otherQuestion.setAttribute("aria-expanded", "false");
-            otherQuestion.nextElementSibling.classList.remove("active");
-          }
-        });
-
-        // Toggle current FAQ
-        question.setAttribute("aria-expanded", !isExpanded);
-        answer.classList.toggle("active");
-      });
-    });
-  }
-
-  // Save form data to localStorage
-  saveFormData() {
-    const formData = {
-      qrText: this.elements.qrText.value,
-      qrSize: this.elements.qrSize.value,
-    };
-
-    localStorage.setItem("qr-generator-form", JSON.stringify(formData));
-  }
-
-  // Load saved form data
-  loadFormData() {
-    try {
-      const saved = localStorage.getItem("qr-generator-form");
-      if (saved) {
-        const formData = JSON.parse(saved);
-
-        if (formData.qrText) this.elements.qrText.value = formData.qrText;
-        if (formData.qrSize) this.elements.qrSize.value = formData.qrSize;
-      }
-    } catch (error) {
-      console.warn("Failed to load saved form data:", error);
+    if (icon) {
+      icon.style.transform =
+        answer && answer.style.display === "block"
+          ? "rotate(180deg)"
+          : "rotate(0deg)";
     }
   }
 
-  // Analytics tracking (privacy-friendly)
-  trackEvent(event, data = {}) {
-    // Simple client-side analytics without external services
-    if (typeof gtag !== "undefined") {
-      gtag("event", event, data);
-    }
-
-    console.log("Event tracked:", event, data);
-  }
-
-  // Register service worker for PWA
-  async registerServiceWorker() {
+  checkServiceWorkerSupport() {
     if ("serviceWorker" in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register(
-          "./service-worker.js"
-        );
-        console.log(
-          "ServiceWorker registered successfully:",
-          registration.scope
-        );
-
-        // Handle updates
-        registration.addEventListener("updatefound", () => {
-          const newWorker = registration.installing;
-          newWorker.addEventListener("statechange", () => {
-            if (
-              newWorker.state === "installed" &&
-              navigator.serviceWorker.controller
-            ) {
-              this.showToast(
-                "App updated! Refresh to use the latest version.",
-                "info"
-              );
-            }
-          });
-        });
-      } catch (error) {
-        console.log("ServiceWorker registration failed:", error);
-      }
+      navigator.serviceWorker
+        .register("./service-worker.js")
+        .then((registration) => console.log("SW registered"))
+        .catch((error) => console.log("SW registration failed"));
     }
   }
 }
 
-// Initialize application when DOM is loaded
+// Initialize the app
 document.addEventListener("DOMContentLoaded", () => {
-  new QRGenerator();
-});
+  window.qrGenerator = new QRGenerator();
 
-// Handle online/offline status
-window.addEventListener("online", () => {
-  document.body.classList.remove("offline");
-});
+  // PWA install prompt
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    window.qrGenerator.deferredPrompt = e;
 
-window.addEventListener("offline", () => {
-  document.body.classList.add("offline");
-});
+    // Show install banner if not dismissed
+    if (!localStorage.getItem("pwa-banner-dismissed")) {
+      const banner = document.querySelector(".pwa-install-banner");
+      if (banner) banner.style.display = "block";
+    }
+  });
 
-// Performance optimization: Preload QR library
-const link = document.createElement("link");
-link.rel = "preload";
-link.href = "https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js";
-link.as = "script";
-document.head.appendChild(link);
+  // Handle app installed event
+  window.addEventListener("appinstalled", () => {
+    const banner = document.querySelector(".pwa-install-banner");
+    if (banner) banner.style.display = "none";
+    console.log("PWA was installed");
+  });
+});
